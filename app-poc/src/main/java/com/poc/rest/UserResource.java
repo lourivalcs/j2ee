@@ -3,17 +3,16 @@ package com.poc.rest;
 import com.poc.ListTemp;
 import com.poc.model.dto.UserDTO;
 
+import javax.validation.Valid;
 import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import java.util.List;
-import java.util.stream.Collectors;
-
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.core.*;
+import java.util.Map;
 
 @Path("/user")
 @Produces({
-        MediaType.APPLICATION_JSON,
-        MediaType.TEXT_PLAIN
+        MediaType.APPLICATION_JSON
 })
 public class UserResource {
 
@@ -28,34 +27,112 @@ public class UserResource {
     @GET()
     @Path("/{userId}")
     public Response find(@PathParam("userId") long userId) {
-        List<UserDTO> users = ListTemp
-                .getUsers()
-                .stream()
-                .filter(f -> f.getUserId() == userId)
-                .collect(Collectors.toList());
-
         return Response
                 .ok()
-                .entity(users)
+                .entity(ListTemp.findUsers(userId))
                 .build();
     }
 
     @POST
-    public Response create(UserDTO user) {
+    public Response create(@Valid UserDTO user) {
         ListTemp.addUser(user);
         return Response.ok().build();
     }
 
     @PUT
-    public Response update(UserDTO user) {
+    public Response update(@Valid UserDTO user) {
         ListTemp.updateUser(user);
         return Response.ok().build();
     }
 
     @DELETE
     @Path("/{userId}")
-    public Response delete(@PathParam("userId")long userId) {
+    public Response delete(@PathParam("userId") long userId) {
         ListTemp.deleteUser(userId);
-        return Response.ok().entity("Test").build();
+        return Response.ok().build();
     }
+
+    @GET
+    @Path("findWithQueryString")
+    public Response findWithQueryString(
+            @DefaultValue("1") @QueryParam("userId") long userId
+    ) {
+        return Response
+                .ok()
+                .entity(ListTemp.findUsers(userId))
+                .build();
+    }
+
+    @GET
+    @Path("/getPathParameters")
+    public Response getPathParameters(@Context UriInfo ui) {
+        MultivaluedMap<String, String> pathParams = ui.getPathParameters();
+
+        return Response
+                .ok()
+                .entity(pathParams)
+                .build();
+    }
+
+    @GET
+    @Path("/getQueryParameters")
+    public Response getQueryParameters(@Context UriInfo ui) {
+        MultivaluedMap<String, String> pathParams = ui.getQueryParameters();
+
+        return Response
+                .ok()
+                .entity(pathParams)
+                .build();
+    }
+
+    @GET
+    @Path("/getHeaderParams")
+    public Response getHeaderParams(@Context HttpHeaders hh) {
+        MultivaluedMap<String, String> headerParams = hh.getRequestHeaders();
+
+        return Response
+                .ok()
+                .entity(headerParams)
+                .build();
+    }
+
+    @GET
+    @Path("/getCookies")
+    public Response getCookies(@Context HttpHeaders hh) {
+        Map<String, Cookie> pathParams = hh.getCookies();
+
+        return Response
+                .ok()
+                .entity(pathParams)
+                .build();
+    }
+
+    @GET
+    @Path("/random")
+    public Response requestAnotherRest() {
+        Client client = ClientBuilder.newClient();
+
+        String obj = client
+                .target("https://randomuser.me/api/?results=10")
+                .request(MediaType.APPLICATION_JSON)
+                .get(String.class);
+
+        client.close();
+
+        return Response
+                .ok()
+                .entity(obj)
+                .build();
+    }
+
+    @GET
+    @Path("/findWithEmail/{firstname}.{lastname}@{domain}.com")
+    public Response subresource(@PathParam("firstname") String firstname, @PathParam("lastname") String lastname, @PathParam("domain") String domain) {
+        String stringComplete = firstname + " | " + lastname + " | " + domain;
+        return Response
+                .ok()
+                .entity(stringComplete)
+                .build();
+    }
+
 }

@@ -1,10 +1,18 @@
 package com.poc.model.dto;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
+
 public class UserDTO {
     private long userId;
     private String name;
     private int age;
     private String gender;
+
+    @NotBlank
+    @NotEmpty
+    @Size(min=5)
     private String email;
 
     public UserDTO() {
@@ -46,5 +54,13 @@ public class UserDTO {
 
     public void setGender(String gender) {
         this.gender = gender;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }

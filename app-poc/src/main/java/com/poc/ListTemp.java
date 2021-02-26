@@ -21,6 +21,14 @@ public class ListTemp {
         return userDTOS;
     }
 
+    public static List<UserDTO> findUsers(long userId) {
+        return ListTemp
+                .getUsers()
+                .stream()
+                .filter(f -> f.getUserId() == userId)
+                .collect(Collectors.toList());
+    }
+
     public static void addUser(UserDTO user) {
         userDTOS.add(user);
     }

@@ -2,7 +2,10 @@ package com.poc.rest;
 
 import com.poc.ListTemp;
 import com.poc.model.dto.UserDTO;
+import com.poc.model.entity.UserEntity;
+import com.poc.repository.UserRepository;
 
+import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.client.Client;
@@ -15,6 +18,9 @@ import java.util.Map;
         MediaType.APPLICATION_JSON
 })
 public class UserResource {
+
+    @Inject
+    UserRepository userRepository;
 
     @GET
     public Response findAll() {
@@ -35,6 +41,9 @@ public class UserResource {
 
     @POST
     public Response create(@Valid UserDTO user) {
+        UserEntity userEntity = new UserEntity();
+        userEntity.setName(user.getName());
+        userRepository.insert(userEntity);
         ListTemp.addUser(user);
         return Response.ok().build();
     }
